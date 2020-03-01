@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Socket.io</title>
+</head>
+
+<body>
+<label for="gare1">Nom de la gare:</label>
+
+<input type="text" id="gare1" name="name" required
+       minlength="1" maxlength="30" size="10">
+
+<label for="gare2">Nom de la gare:</label>
+
+<input type="text" id="gare2" name="name" required
+       minlength="1" maxlength="30" size="10">
+
+
+<input type="button" value="test" onclick = "f()" >
+
+
+
+
+<div id="text"> abc </div>
+
+<div id="calcule"> distance vide</div>
+
+
+<div id="liste">
+    <FORM >
+        <SELECT name="nom" size="1" id="mySelect1">
+            <option> CHAMBERY CHALLES LES EAUX GARE  </option>
+
+        </SELECT>
+    </FORM>
+</div>
+
+<div id="liste2">
+    <FORM >
+        <SELECT name="nom" size="1" id="mySelect2">
+            <option> PARIS AUSTERLITZ GARE  </option>
+
+        </SELECT>
+    </FORM>
+
+    <input type="button" value="calcul" onclick = "calcul()" >
+
+</div>
+
+<!--<p><input type="button" value="Embêter le serveur" onclick = "test()" /></p>-->
+
+<script src="sncf.js"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socket = io.connect('http://localhost:4000');
+    json = {};
+    json2 = {};
+    json["CHAMBERY CHALLES LES EAUX GARE"] = [5.919547, 45.571302];
+    json2["PARIS AUSTERLITZ GARE"] = [2.364891, 48.842285];
+
+    args = [0,0,0,0];
+    function calcul() {
+        console.log(test1 = document.getElementById("mySelect1").value);
+        console.log(test2 = document.getElementById("mySelect2").value);
+
+
+        console.log(json[test1]);
+        console.log(json2[test2]);
+        coord1 = json[test1];
+        coord2 = json2[test2];
+        document.getElementById('calcule').innerHTML += 'coordonnées1 ' + coord1 +test1 + '\n' +
+            'coordonnées2 ' + coord2 +test2 + '\n'
+        ;
+
+        //socket.emit('calcul', args );
+    }
+
+    function f(){
+        argument = {nom1 :document.getElementById("gare1").value , nom2 :document.getElementById("gare2").value  }
+        socket.emit('trouveGarre', argument );
+    }
+
+    socket.on('req', function (args) {
+        console.log(args);
+        document.getElementById('calcule').innerHTML = 'distance' + args;
+
+    });
+
+    socket.on('gare', function (args) {
+        console.log(args);
+        document.getElementById('calcule').innerHTML += 'distance' + args;
+
+    });
+
+    socket.on('listeGarre', function (args) {
+        console.log(args);
+
+
+        res = '<FORM id="liste 2">\n' +
+            '    <SELECT name="nom" size="1" id="mySelect1">\n';
+        for(key in args[0]) {
+            res +='<option> '+key+'  </option> \n' ;
+        }
+        //console.log(res);
+        document.getElementById('liste').innerHTML =  res +  '</SELECT> \n'+
+            ' </FORM>';
+
+        json = args[0];
+        res = '<FORM id="liste 1">\n' +
+            '    <SELECT name="nom" size="1" id="mySelect2">\n';
+        for(key in args[1]) {
+            res +='<option> '+key+'  </option> \n' ;
+        }
+       // console.log(res);
+        document.getElementById('liste2').innerHTML =  res +  '</SELECT> \n'+
+            ' </FORM>';
+
+
+        json2 = args[1];
+        document.getElementById('liste2').innerHTML += '<input type="button" value="calcul" onclick = "calcul()" >';
+
+    });
+
+
+</script>
+</body>
+</html>
